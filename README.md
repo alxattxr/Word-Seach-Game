@@ -8,3 +8,7 @@ Hope you Enjoy!
 
 
 ## How the App looks 
+
+![Simulator Screen Shot - iPhone 8 - 2019-05-15 at 07 21 09](https://user-images.githubusercontent.com/50662248/57774468-9c670c00-76e8-11e9-8d81-740e85f5defc.png)
+
+
