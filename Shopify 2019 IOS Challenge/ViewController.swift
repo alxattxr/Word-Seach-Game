@@ -27,22 +27,33 @@ class ViewController: UIViewController {
     @IBOutlet weak var gridSizeLabel: UILabel!
     @IBOutlet weak var gridSizeSlider: UISlider!
     @IBOutlet weak var difficultySegmentControl: UISegmentedControl!
+    @IBOutlet weak var timeAttackSwitch: UISwitch!
+    @IBOutlet weak var hideWordsSwitch: UISwitch!
     
     @IBAction func indexChanged(_ sender: Any) {
         switch difficultySegmentControl.selectedSegmentIndex {
         case 0:
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:0.40, green:0.74, blue:0.12, alpha:0.80))
+            timeAttackSwitch.setOn(false, animated: true)
+            hideWordsSwitch.setOn(false, animated: true)
             gridSizeSlider.value = 10
             globalVariable.gridSize = Int(gridSizeSlider.value)
             gridSizeLabel.text = "Grid Size: \(globalVariable.gridSize) X \(globalVariable.gridSize)"
         case 1:
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:0.92, green:0.80, blue:0.04, alpha:0.80))
-            gridSizeSlider.value = 12
+            gridSizeSlider.value = 11
             globalVariable.gridSize = Int(gridSizeSlider.value)
             gridSizeLabel.text = "Grid Size: \(globalVariable.gridSize) X \(globalVariable.gridSize)"
         case 2:
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
+            gridSizeSlider.value = 13
+            globalVariable.gridSize = Int(gridSizeSlider.value)
+            gridSizeLabel.text = "Grid Size: \(globalVariable.gridSize) X \(globalVariable.gridSize)"
+        case 3:
+            difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
             gridSizeSlider.value = 15
+            timeAttackSwitch.setOn(true, animated: true)
+            hideWordsSwitch.setOn(true, animated: true)
             globalVariable.gridSize = Int(gridSizeSlider.value)
             gridSizeLabel.text = "Grid Size: \(globalVariable.gridSize) X \(globalVariable.gridSize)"
         default:
@@ -53,16 +64,30 @@ class ViewController: UIViewController {
     @IBAction func changeGridSize(_ sender: Any) {
         globalVariable.gridSize = Int(gridSizeSlider.value)
         gridSizeLabel.text = "Grid Size: \(globalVariable.gridSize) X \(globalVariable.gridSize)"
-        if (globalVariable.gridSize < 12){
+        if (globalVariable.gridSize < 11){
             difficultySegmentControl.selectedSegmentIndex = 0
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:0.40, green:0.74, blue:0.12, alpha:0.80))
-        } else if (globalVariable.gridSize < 14) {
+        } else if (globalVariable.gridSize < 12) {
             difficultySegmentControl.selectedSegmentIndex = 1
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:0.92, green:0.80, blue:0.04, alpha:0.80))
-        } else {
+        } else if (globalVariable.gridSize < 14) {
             difficultySegmentControl.selectedSegmentIndex = 2
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
+        } else if (globalVariable.gridSize == 15 && timeAttackSwitch.isOn && hideWordsSwitch.isOn) {
+            difficultySegmentControl.selectedSegmentIndex = 3
+            difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.14, blue:0.14, alpha:0.80))
         }
+    }
+    
+    @IBAction func hideWordsValueChanged(_ sender: Any) {
+        if (hideWordsSwitch.isOn && timeAttackSwitch.isOn && globalVariable.gridSize == 15) {
+            difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
+            gridSizeSlider.value = 15
+            difficultySegmentControl.selectedSegmentIndex = 3
+        }
+    }
+    
+    @IBAction func timeAttackValueChanged(_ sender: Any) {
     }
     
     //For The main menu we want to prevent rotation
@@ -94,8 +119,6 @@ extension UISegmentedControl {
     }
     
     func setSelectedAttribute(color: UIColor){
-        self.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: color,
-                                     NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 16)],
-                                    for: .selected)
+        self.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: color, NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 16)], for: .selected)
     }
 }
