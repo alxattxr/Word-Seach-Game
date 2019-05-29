@@ -31,22 +31,27 @@ class GameBoardViewController: UIViewController, UIGestureRecognizerDelegate  {
     @IBOutlet weak var gameBoardHeight: NSLayoutConstraint!
     @IBOutlet weak var searchWordsHeight: NSLayoutConstraint!
     @IBOutlet weak var scoreLabel: UILabel!
+    @IBOutlet weak var timerLabel: UILabel!
+    
     var panGesture  = UIPanGestureRecognizer()
     var startCoordinates:IndexPath?
     var endCoordinates:IndexPath?
     var selectedCell: UIView?
+    var seconds = 30
     
     //Game setup variable
-    public var gridSize:Int = ViewController.globalVariable.gridSize
-    var hideWords:Bool = false
+    private let gridSize:Int = ViewController.globalVariable.gridSize
+    private let timerOn:Bool = ViewController.globalVariable.timer
+    private let hideWordsOn:Bool = ViewController.globalVariable.hideWords
     var gameOver:Bool = false {
         didSet{
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let controller = storyboard.instantiateViewController(withIdentifier: "modal")
+            let controller = score < words.count ? storyboard.instantiateViewController(withIdentifier: "loseModal") : storyboard.instantiateViewController(withIdentifier: "winModal")
             controller.modalPresentationStyle = .overCurrentContext
             self.present(controller, animated: true, completion: nil)
         }
     }
+    
     var score:Int = 0
     var words = ["SWIFT", "JAVA", "KOTLIN", "OBJECTIVEC", "VARIABLE", "MOBILE", "REACT", "PHP", "IPHONE", "APPLE"]
     var copyArray: [String]?
@@ -59,6 +64,19 @@ class GameBoardViewController: UIViewController, UIGestureRecognizerDelegate  {
         searchWords.layer.borderWidth = 1
         searchWords.layer.cornerRadius = 20
         searchWords.layer.borderColor = UIColor.clear.cgColor
+        
+        if(timerOn){
+            let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
+                self.seconds -= 1
+                self.timerLabel.text? = "00:\(self.seconds)"
+                if (self.seconds <= 0){
+                    timer.invalidate()
+                    self.gameOver = true
+                }
+            })
+            timer.fire()
+        }
+        
         
         gameBoard.layer.borderWidth = 1
         gameBoard.layer.cornerRadius = 10
@@ -136,8 +154,8 @@ extension GameBoardViewController: UICollectionViewDataSource {
     }
     
     func randomLetter() -> String {
-        let uppercaseLetters = (65...90).map {String(UnicodeScalar($0))}
-        return uppercaseLetters.randomElement()!
+        guard let uppercaseLetters = ((65...90).map {String(UnicodeScalar($0))}).randomElement() else { return "" }
+        return uppercaseLetters
     }
     
     //For Safe Measure use function to verify if it's possible to populate the collection cell for 'word' into 'direction' from 'index'
@@ -296,6 +314,7 @@ extension GameBoardViewController: UICollectionViewDelegateFlowLayout {
 }
 
 private extension GameBoardViewController {
+    
     func verifyGuessedWord(startingIndexPath: IndexPath, endindIndexPath: IndexPath) -> String{
         let positionX = startingIndexPath.section
         let positionY = startingIndexPath.row
@@ -343,6 +362,8 @@ private extension GameBoardViewController {
         return guessWord
     }
     
+    //#selector Function for locating which letter we touch
+    //Get the size of our board devided by the size the number of cell (The grid size selected on main menu)
     @objc func touchGestureBoard(_ sender:UIPanGestureRecognizer) {
         let location = sender.location(in: gameBoard)
         let cellSize = (gameBoard.contentSize.width)/CGFloat(gridSize)
@@ -370,6 +391,14 @@ private extension GameBoardViewController {
                 words.remove(at: wordFoundIndex)
                 score+=1
                 scoreLabel.text? = "\(score)"
+                //if on timeAttack mode
+                if(timerOn){
+                    seconds += 12
+                    
+                    //TODO = replace 12 by different color, animate? presentation
+                    timerLabel.text? = "\(timerLabel.text!) + 12"
+                }
+                
                 //Game Over
                 if (score == 10) {
                     gameOver = true

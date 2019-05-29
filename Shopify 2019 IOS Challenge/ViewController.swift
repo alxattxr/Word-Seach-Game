@@ -19,6 +19,8 @@ class ViewController: UIViewController {
     
     struct globalVariable {
         static var gridSize = Int()
+        static var timer = Bool()
+        static var hideWords = Bool()
     }
     
     @IBOutlet weak var playButton: UIButton!
@@ -80,6 +82,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func hideWordsValueChanged(_ sender: Any) {
+        globalVariable.hideWords = hideWordsSwitch.isOn ? true : false
         if (hideWordsSwitch.isOn && timeAttackSwitch.isOn && globalVariable.gridSize == 15) {
             difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
             gridSizeSlider.value = 15
@@ -88,6 +91,12 @@ class ViewController: UIViewController {
     }
     
     @IBAction func timeAttackValueChanged(_ sender: Any) {
+        globalVariable.timer = timeAttackSwitch.isOn ? true : false
+        if (hideWordsSwitch.isOn && timeAttackSwitch.isOn && globalVariable.gridSize == 15) {
+            difficultySegmentControl.setSelectedAttribute(color: UIColor(red:1.00, green:0.61, blue:0.14, alpha:0.80))
+            gridSizeSlider.value = 15
+            difficultySegmentControl.selectedSegmentIndex = 3
+        }
     }
     
     //For The main menu we want to prevent rotation
@@ -97,7 +106,12 @@ class ViewController: UIViewController {
             return .portrait
         }
     }
-
+    
+    @IBAction func playGame(_ sender: Any) {
+        globalVariable.hideWords = hideWordsSwitch.isOn ? true : false
+        print(globalVariable.timer)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         globalVariable.gridSize = Int(gridSizeSlider.value)
