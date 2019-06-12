@@ -65,18 +65,8 @@ class GameBoardViewController: UIViewController, UIGestureRecognizerDelegate  {
         searchWords.layer.cornerRadius = 20
         searchWords.layer.borderColor = UIColor.clear.cgColor
         
-        if(timerOn){
-            let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
-                self.seconds -= 1
-                self.timerLabel.text? = "00:\(self.seconds)"
-                if (self.seconds <= 0){
-                    timer.invalidate()
-                    self.gameOver = true
-                }
-            })
-            timer.fire()
-        }
         
+        gameTimer(endGame: gameOver)
         
         gameBoard.layer.borderWidth = 1
         gameBoard.layer.cornerRadius = 10
@@ -315,6 +305,22 @@ extension GameBoardViewController: UICollectionViewDelegateFlowLayout {
 
 private extension GameBoardViewController {
     
+    func gameTimer(endGame:Bool = false ) {
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
+            self.seconds -= 1
+            self.timerLabel.text? = "00:\(self.seconds)"
+            if (self.seconds <= 0){
+                timer.invalidate()
+                self.gameOver = true
+            }
+        })
+        if endGame {
+            timer.invalidate()
+        } else {
+            timer.fire()
+        }
+    }
+    
     func verifyGuessedWord(startingIndexPath: IndexPath, endindIndexPath: IndexPath) -> String{
         let positionX = startingIndexPath.section
         let positionY = startingIndexPath.row
@@ -375,10 +381,10 @@ private extension GameBoardViewController {
             startCoordinates = [x, y]
         }
         
-        if sender.state == .ended{
+        if sender.state == .ended {
             endCoordinates = [x, y]
             let guessWord = verifyGuessedWord(startingIndexPath: startCoordinates!, endindIndexPath: endCoordinates!)
-            if words.contains(guessWord){
+            if words.contains(guessWord) {
                 gameBoard.drawLineFrom(from: [startCoordinates!.row, startCoordinates!.section], to: [endCoordinates!.row, endCoordinates!.section])
                 guard let wordFoundIndex = words.firstIndex(of: guessWord) else { return }
                 
@@ -392,16 +398,19 @@ private extension GameBoardViewController {
                 score+=1
                 scoreLabel.text? = "\(score)"
                 //if on timeAttack mode
-                if(timerOn){
-                    seconds += 12
+                if (timerOn) {
+                    seconds += 10
                     
                     //TODO = replace 12 by different color, animate? presentation
-                    timerLabel.text? = "\(timerLabel.text!) + 12"
+                    timerLabel.text? = "\(timerLabel.text!) + 10"
                 }
                 
                 //Game Over
-                if (score == 10) {
+                //We compare to the copyArray since we remove words guessed from words array
+                if (score == copyArray!.count) {
                     gameOver = true
+                    gameTimer(endGame: gameOver)
+
                 }
             }
         }
@@ -445,5 +454,15 @@ private extension UIColor {
 private extension CGFloat {
     static func random() -> CGFloat {
         return CGFloat(arc4random()) / CGFloat(UInt32.max)
+    }
+}
+
+extension UILabel {
+    func addTimeTextColor(fullText: String , changeText: String) {
+        let strNumber: NSString = fullText as NSString
+        let range = (strNumber).range(of: changeText)
+        let attribute = NSMutableAttributedString.init(string: fullText)
+        attribute.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red , range: range)
+        self.attributedText = attribute
     }
 }
